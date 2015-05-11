@@ -43,7 +43,7 @@ class DB {
   virtual ~DB() { }
   virtual void Open(const string& source, Mode mode) = 0;
   virtual void Close() = 0;
-  virtual Cursor* NewCursor() = 0;
+  virtual Cursor* NewCursor(DataParameter::CURSOR_TYPE type = DataParameter_CURSOR_TYPE_ORDINARY) = 0;
   virtual Transaction* NewTransaction() = 0;
 
   DISABLE_COPY_AND_ASSIGN(DB);
@@ -94,9 +94,16 @@ class LevelDB : public DB {
       db_ = NULL;
     }
   }
-  virtual LevelDBCursor* NewCursor() {
+
+  virtual LevelDBCursor* NewCursor(DataParameter::CURSOR_TYPE type){
+      if (type == DataParameter_CURSOR_TYPE_ORDINARY)
     return new LevelDBCursor(db_->NewIterator(leveldb::ReadOptions()));
+      else { 
+          NOT_IMPLEMENTED;
+          return NULL;
+      } 
   }
+
   virtual LevelDBTransaction* NewTransaction() {
     return new LevelDBTransaction(db_);
   }
@@ -130,7 +137,7 @@ class LMDBCursor : public Cursor {
   }
   virtual bool valid() { return valid_; }
 
- private:
+ protected:
   void Seek(MDB_cursor_op op) {
     int mdb_status = mdb_cursor_get(mdb_cursor_, &mdb_key_, &mdb_value_, op);
     if (mdb_status == MDB_NOTFOUND) {
@@ -146,6 +153,51 @@ class LMDBCursor : public Cursor {
   MDB_val mdb_key_, mdb_value_;
   bool valid_;
 };
+
+class LMDBShuffleCursor : public LMDBCursor {
+ public:
+  explicit LMDBShuffleCursor(MDB_txn* mdb_txn, MDB_cursor* mdb_cursor)
+    : LMDBCursor(mdb_txn, mdb_cursor) {
+    GetKeys(&keys_);
+
+    keys_permutation_.resize(keys_.size());
+    for (int i = 0; i < keys_.size(); ++i) {
+      keys_permutation_[i] = i;
+    }
+
+    SeekToFirst();
+  }
+  virtual ~LMDBShuffleCursor() {}
+  virtual void SeekToFirst() { 
+    std::random_shuffle(keys_permutation_.begin(), keys_permutation_.end());
+    keys_iter_ = 0;
+  }
+  virtual void Next() { 
+    ++keys_iter_;
+    if (keys_iter_ >= keys_.size()) {
+      valid_ = false;
+    } else {
+      mdb_key_ = keys_[keys_permutation_[keys_iter_]];
+      Seek(MDB_SET_KEY);
+    }
+  }
+
+ private:
+  void GetKeys(vector<MDB_val>* keys) {
+    LMDBCursor::SeekToFirst();
+    keys->clear();
+    while (valid()) {
+      keys->push_back(mdb_key_);
+      LMDBCursor::Next();
+    }
+  }
+
+  vector<MDB_val> keys_;
+  vector<int> keys_permutation_;
+  int keys_iter_;    
+};
+
+
 
 class LMDBTransaction : public Transaction {
  public:
@@ -173,7 +225,8 @@ class LMDB : public DB {
       mdb_env_ = NULL;
     }
   }
-  virtual LMDBCursor* NewCursor();
+
+  virtual LMDBCursor* NewCursor(DataParameter::CURSOR_TYPE type);
   virtual LMDBTransaction* NewTransaction();
 
  private:

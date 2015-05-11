@@ -27,7 +27,7 @@ void DataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
   // Initialize DB
   db_.reset(db::GetDB(this->layer_param_.data_param().backend()));
   db_->Open(this->layer_param_.data_param().source(), db::READ);
-  cursor_.reset(db_->NewCursor());
+  cursor_.reset(db_->NewCursor(this->layer_param_.data_param().cursor()));
 
   // Check if we should randomly skip a few data points
   if (this->layer_param_.data_param().rand_skip()) {

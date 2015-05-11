@@ -11,6 +11,8 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/util/upgrade_proto.hpp"
 
+#include "caffe/messenger.hpp"
+
 namespace caffe {
 
 template <typename Dtype>
@@ -168,6 +170,8 @@ void Solver<Dtype>::Step(int iters) {
   Dtype smoothed_loss = 0;
 
   for (; iter_ < stop_iter; ++iter_) {
+    Messenger::SendMessage("SOLVER_ITER_CHANGED", &iter_);
+    
     if (param_.test_interval() && iter_ % param_.test_interval() == 0
         && (iter_ > 0 || param_.test_initialization())) {
       TestAll();
