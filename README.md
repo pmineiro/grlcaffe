@@ -1,34 +1,28 @@
-# Caffe
+# Gradient Reversal Branch
 
-Caffe is a deep learning framework made with expression, speed, and modularity in mind.
-It is developed by the Berkeley Vision and Learning Center ([BVLC](http://bvlc.eecs.berkeley.edu)) and community contributors.
+This is an extension to Caffe which allows one to reproduce some of the results presented in the paper [Unsupervised Domain Adaptation by Backpropagation](http://arxiv.org/abs/1409.7495) (accepted to ICML 2015).
 
-Check out the [project site](http://caffe.berkeleyvision.org) for all the details like
+## How to use
 
-- [DIY Deep Learning for Vision with Caffe](https://docs.google.com/presentation/d/1UeKXVgRvvxg9OUdh_UiC5G71UMscNPlvArsWER41PsU/edit#slide=id.p)
-- [Tutorial Documentation](http://caffe.berkeleyvision.org/tutorial/)
-- [BVLC reference models](http://caffe.berkeleyvision.org/model_zoo.html) and the [community model zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo)
-- [Installation instructions](http://caffe.berkeleyvision.org/installation.html)
+Download and unpack the [Office dataset](http://www.cs.uml.edu/~saenko/data/domain_adaptation_images.tar.gz). Let `<office_dir>` be the path where you uncompressed the files. 
 
-and step-by-step examples.
+Change the current directory to the root folder of the Caffe repository. Use the following command to fetch additional files, prepare lmdb datasets for Caffe and setup directories for the experiments:
+```
+./examples/adaptation/scripts/prepare_experiments.sh <office_dir>
+```
 
-[![Join the chat at https://gitter.im/BVLC/caffe](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BVLC/caffe?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Now everything is ready for reproducing the results. For example, to train an adapted model for the **Amazon to Webcam** setting invoke:
+```
+./examples/adaptation/experiments/amazon_to_webcam/scripts/train.sh
+```
+Change `amazon_to_webcam` either to `dslr_to_webcam` or to `webcam_to_dslr` in order to obtain models for other settings.
 
-Please join the [caffe-users group](https://groups.google.com/forum/#!forum/caffe-users) or [gitter chat](https://gitter.im/BVLC/caffe) to ask questions and talk about methods and models.
-Framework development discussions and thorough bug reports are collected on [Issues](https://github.com/BVLC/caffe/issues).
+## Citation
 
-Happy brewing!
-
-## License and Citation
-
-Caffe is released under the [BSD 2-Clause license](https://github.com/BVLC/caffe/blob/master/LICENSE).
-The BVLC reference models are released for unrestricted use.
-
-Please cite Caffe in your publications if it helps your research:
-
-    @article{jia2014caffe,
-      Author = {Jia, Yangqing and Shelhamer, Evan and Donahue, Jeff and Karayev, Sergey and Long, Jonathan and Girshick, Ross and Guadarrama, Sergio and Darrell, Trevor},
-      Journal = {arXiv preprint arXiv:1408.5093},
-      Title = {Caffe: Convolutional Architecture for Fast Feature Embedding},
-      Year = {2014}
+Please cite the following technical report if you are using this extension in your research:
+    @article{ganin2014unsupervised,
+        title={Unsupervised Domain Adaptation by Backpropagation},
+        author={Ganin, Yaroslav and Lempitsky, Victor},
+        journal={arXiv preprint arXiv:1409.7495},
+        year={2014}
     }
