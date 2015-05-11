@@ -20,6 +20,7 @@ Change `amazon_to_webcam` either to `dslr_to_webcam` or to `webcam_to_dslr` in o
 ## Citation
 
 Please cite the following technical report if you are using this extension in your research:
+
     @article{ganin2014unsupervised,
         title={Unsupervised Domain Adaptation by Backpropagation},
         author={Ganin, Yaroslav and Lempitsky, Victor},
