@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 OFFICE_DIR=$1
  
 ROOT_DIR="$( cd "$(dirname "$0")"/../../.. ; pwd -P )"
@@ -15,7 +17,7 @@ echo "[*] Downloading ImageNet aux data..."
 
 # Prepare lmdb databases for the Office dataset.
 echo "[*] Preparing datasets..."
-mkdir ./examples/adaptation/datasets
+test -d ./examples/adaptation/datasets || mkdir ./examples/adaptation/datasets
 for DOMAIN in amazon webcam dslr; do
     python ./examples/adaptation/scripts/convert_data.py \
         -s $OFFICE_DIR/domain_adaptation_images/ \
